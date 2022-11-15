@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -12,6 +13,8 @@ public class Plane : MonoBehaviour
     int angle;
     int maxAngle = 20;
     int minAngle = -50;
+
+    public Score score;
     
     // Start is called before the first frame update
     void Start()
@@ -24,7 +27,12 @@ public class Plane : MonoBehaviour
     void Update()
     {
         PlaneFly();
-        PlaneRotation();
+        
+    }
+
+    private void FixedUpdate()
+    {
+        PlaneRotation(); // yukarı aşağı hareketi daha gerçekçi olsun diye (cihazdan ve işlem gücünden bağımsız aynı sonuçları almak için)
     }
 
     void PlaneFly()
@@ -54,5 +62,13 @@ public class Plane : MonoBehaviour
         }
         
         transform.rotation = Quaternion.Euler(0, 0, angle); // To give angular rotation
+    }
+
+    private void OnTriggerEnter2D(Collider2D col)
+    {
+        if (col.CompareTag("Obstacle"))
+        {
+            score.Scored();
+        }
     }
 }
