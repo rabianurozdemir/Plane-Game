@@ -1,6 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Plane : MonoBehaviour
@@ -10,24 +7,30 @@ public class Plane : MonoBehaviour
     [SerializeField] // If our variable is private, we have to use this to organise variable on editor.
     private float _speed;
 
-    int angle;
-    int maxAngle = 20;
-    int minAngle = -50;
+    private int _angle;
+    private int _maxAngle = 20;
+    private int _minAngle = -50;
+    private bool _touchedMountain;
 
     public Score score;
+    public GameManager gameManager;
+    public Sprite planeDied;
+    private SpriteRenderer _sp;
+    private Animator _anim;
+    public ObstacleSpawner obstacleSpawner;
     
-    // Start is called before the first frame update
     void Start()
     {
         _rb = GetComponent<Rigidbody2D>(); // We assigned the component of the plane object to our variable.
+        _rb.gravityScale = 0; // Biz tıklamadığımız sürece uçak havada kalacak.
+        _sp = GetComponent<SpriteRenderer>();
+        _anim = GetComponent<Animator>();
 
     }
 
-    // Update is called once per frame
     void Update()
     {
         PlaneFly();
-        
     }
 
     private void FixedUpdate()
@@ -37,10 +40,22 @@ public class Plane : MonoBehaviour
 
     void PlaneFly()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0) && GameManager.gameOver == false)
         {
-            _rb.velocity = Vector2.zero; // We want to see same effect very time we clicked on the plane.
-            _rb.velocity = new Vector2(_rb.velocity.x, _speed); // The plane will bounce upwards when we clicked mouse and then fall downwards. There will be no change in the x-axis.
+            if (GameManager.GameStarted == false)
+            {
+                _rb.gravityScale = 2f;
+                _rb.velocity = Vector2.zero;
+                _rb.velocity = new Vector2(_rb.velocity.x, _speed);
+                obstacleSpawner.InstantiateObstacle();
+                gameManager.GameHasStarted();
+            }
+            else
+            {
+                _rb.velocity = Vector2.zero; // We want to see same effect very time we clicked on the plane.
+                _rb.velocity = new Vector2(_rb.velocity.x, _speed); // The plane will bounce upwards when we clicked mouse and then fall downwards. There will be no change in the x-axis.
+            }
+            
         }
     }
 
@@ -48,20 +63,25 @@ public class Plane : MonoBehaviour
     {
         if (_rb.velocity.y > 0) // up
         {
-            if (angle <= maxAngle)
+            if (_angle <= _maxAngle)
             {
-                angle = angle + 4;
+                _angle = _angle + 4;
             }
         }
         else if (_rb.velocity.y < -1.2) // down, to soften to downturn
         {
-            if (angle > minAngle)
+            if (_angle > _minAngle)
             {
-                angle = angle - 2;
+                _angle = _angle - 2;
             }
         }
+
+        if (_touchedMountain == false)
+        {
+            transform.rotation = Quaternion.Euler(0, 0, _angle);
+        }
         
-        transform.rotation = Quaternion.Euler(0, 0, angle); // To give angular rotation
+        transform.rotation = Quaternion.Euler(0, 0, _angle); // To give angular rotation
     }
 
     private void OnTriggerEnter2D(Collider2D col)
@@ -70,5 +90,33 @@ public class Plane : MonoBehaviour
         {
             score.Scored();
         }
+        else if (col.CompareTag("Column"))
+        {
+            gameManager.GameOver();
+        }
+    }
+    
+    private void OnCollisionEnter2D(Collision2D col)
+    {
+        if (col.gameObject.CompareTag("Mountain"))
+        {
+            if (GameManager.gameOver == false)
+            {
+                gameManager.GameOver();
+                GameOver();
+            }
+            else
+            {
+                GameOver();
+            }
+        }
+    }
+
+    void GameOver()
+    {
+        _touchedMountain = true;
+        transform.rotation = Quaternion.Euler(0,0,-90);
+        _sp.sprite = planeDied;
+        _anim.enabled = false;
     }
 }

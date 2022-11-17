@@ -1,25 +1,40 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
-    public static Vector2 bottomLeft;
-    // Start is called before the first frame update
-
+    public static Vector2 BottomLeft;
+    public static bool gameOver;
+    public GameObject gameOverPanel;
+    public static bool GameStarted;
+    public GameObject getReady;
+    public GameObject score;
 
     private void Awake() // Start tan önce çalışmasını istiyoruz.
     {
-        bottomLeft = Camera.main.ScreenToViewportPoint(new Vector2(0,0)); //Sol alt köşe
+        BottomLeft = Camera.main.ScreenToViewportPoint(new Vector2(0,0)); //Sol alt köşe
+    }
+
+    public void RestartBtn()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
     void Start()
     {
-        
+        gameOver = false;
+        GameStarted = false;
     }
 
-    // Update is called once per frame
-    void Update()
+    public void GameHasStarted()
     {
-        
+        GameStarted = true;
+        getReady.SetActive(false);
+    }
+
+    public void GameOver()
+    {
+        gameOver = true;
+        gameOverPanel.SetActive(true);
+        score.SetActive(false);
     }
 }

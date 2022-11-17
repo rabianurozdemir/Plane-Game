@@ -1,37 +1,32 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class ObstacleSpawner : MonoBehaviour
 {
     public GameObject obstacle;
     public float maxTime;
-    float timer;
+    private float _timer;
     public float maxY;
     public float minY;
-    float randomY;
-    
-    // Start is called before the first frame update
-    void Start()
-    {
-        InstantiateObstacle();
-    }
+    private float _randomY;
 
-    // Update is called once per frame
     void Update()
     {
-        timer += Time.deltaTime;
-        if (timer >= maxTime)
+        if (GameManager.gameOver == false && GameManager.GameStarted == true)
         {
-            randomY = Random.Range(minY, maxY);
-            InstantiateObstacle();
-            timer = 0;
+            _timer += Time.deltaTime;
+            if (_timer >= maxTime)
+            {
+                _randomY = Random.Range(minY, maxY);
+                InstantiateObstacle();
+                _timer = 0;
+            }
         }
+        
     }
 
     public void InstantiateObstacle()
     {
         GameObject newObstacle = Instantiate(obstacle);
-        newObstacle.transform.position = new Vector2(transform.position.x, randomY);
+        newObstacle.transform.position = new Vector2(transform.position.x, _randomY);
     }
 }
