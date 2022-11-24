@@ -2,15 +2,16 @@ using UnityEngine;
 
 public class Plane : MonoBehaviour
 {
-    Rigidbody2D _rb;
-    
+    public Rigidbody2D rb;
+
     [SerializeField] // If our variable is private, we have to use this to organise variable on editor.
-    private float _speed;
+    public float _speed;
 
     private int _angle;
-    private int _maxAngle = 20;
-    private int _minAngle = -50;
+    private int _maxAngle = 10;
+    private int _minAngle = -20;
     private bool _touchedMountain;
+    public Vector2 _playerDirection;
 
     public Score score;
     public GameManager gameManager;
@@ -18,16 +19,15 @@ public class Plane : MonoBehaviour
     private SpriteRenderer _sp;
     private Animator _anim;
     public ObstacleSpawner obstacleSpawner;
-    
+    [SerializeField] private AudioSource hit, point;
+
     void Start()
     {
-        _rb = GetComponent<Rigidbody2D>(); // We assigned the component of the plane object to our variable.
-        _rb.gravityScale = 0; // Biz tıklamadığımız sürece uçak havada kalacak.
+        rb = GetComponent<Rigidbody2D>(); // We assigned the component of the plane object to our variable.
+        rb.gravityScale = 0; // Biz tıklamadığımız sürece uçak havada kalacak.
         _sp = GetComponent<SpriteRenderer>();
         _anim = GetComponent<Animator>();
-
     }
-
     void Update()
     {
         PlaneFly();
@@ -38,37 +38,36 @@ public class Plane : MonoBehaviour
         PlaneRotation(); // yukarı aşağı hareketi daha gerçekçi olsun diye (cihazdan ve işlem gücünden bağımsız aynı sonuçları almak için)
     }
 
-    void PlaneFly()
+    public void PlaneFly()
     {
         if (Input.GetMouseButtonDown(0) && GameManager.gameOver == false)
         {
             if (GameManager.GameStarted == false)
             {
-                _rb.gravityScale = 2f;
-                _rb.velocity = Vector2.zero;
-                _rb.velocity = new Vector2(_rb.velocity.x, _speed);
+                rb.gravityScale = 2f;
+                rb.velocity = new Vector2(rb.velocity.x, _speed);
                 obstacleSpawner.InstantiateObstacle();
                 gameManager.GameHasStarted();
             }
-            else
-            {
-                _rb.velocity = Vector2.zero; // We want to see same effect very time we clicked on the plane.
-                _rb.velocity = new Vector2(_rb.velocity.x, _speed); // The plane will bounce upwards when we clicked mouse and then fall downwards. There will be no change in the x-axis.
-            }
-            
         }
-    }
 
+        // else if (buttonRestart.name == "restart")
+        // {
+        //     buttonRestart.onClick.addlistener(RestartBtn)   
+        //     gameManager.RestartBtn();
+        // }
+    }
+    
     void PlaneRotation()
     {
-        if (_rb.velocity.y > 0) // up
+        if (rb.velocity.y > 0) // up
         {
             if (_angle <= _maxAngle)
             {
                 _angle = _angle + 4;
             }
         }
-        else if (_rb.velocity.y < -1.2) // down, to soften to downturn
+        else if (rb.velocity.y < -1.2) // down, to soften to downturn
         {
             if (_angle > _minAngle)
             {
@@ -80,7 +79,7 @@ public class Plane : MonoBehaviour
         {
             transform.rotation = Quaternion.Euler(0, 0, _angle);
         }
-        
+
         transform.rotation = Quaternion.Euler(0, 0, _angle); // To give angular rotation
     }
 
@@ -89,34 +88,40 @@ public class Plane : MonoBehaviour
         if (col.CompareTag("Obstacle"))
         {
             score.Scored();
+            point.Play();
         }
-        else if (col.CompareTag("Column"))
+        else if (col.CompareTag("Column") && GameManager.gameOver == false)
         {
             gameManager.GameOver();
+            GameOver();
+            PlaneDieSoundEffect();
         }
     }
-    
+
     private void OnCollisionEnter2D(Collision2D col)
     {
         if (col.gameObject.CompareTag("Mountain"))
         {
             if (GameManager.gameOver == false)
             {
+                PlaneDieSoundEffect();
                 gameManager.GameOver();
-                GameOver();
             }
-            else
-            {
-                GameOver();
-            }
+            
+            GameOver();
         }
     }
-
     void GameOver()
     {
         _touchedMountain = true;
-        transform.rotation = Quaternion.Euler(0,0,-90);
+        _minAngle = -90;
         _sp.sprite = planeDied;
         _anim.enabled = false;
+    }
+
+    private void PlaneDieSoundEffect()
+    {
+        hit.Play();
+        
     }
 }

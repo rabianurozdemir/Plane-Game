@@ -9,6 +9,7 @@ public class GameManager : MonoBehaviour
     public static bool GameStarted;
     public GameObject getReady;
     public GameObject score;
+    public static int gameScore;
 
     private void Awake() // Start tan önce çalışmasını istiyoruz.
     {
@@ -17,7 +18,7 @@ public class GameManager : MonoBehaviour
 
     public void RestartBtn()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        SceneManager.LoadScene("Game");
     }
     void Start()
     {
@@ -36,5 +37,6 @@ public class GameManager : MonoBehaviour
         gameOver = true;
         gameOverPanel.SetActive(true);
         score.SetActive(false);
+        gameScore = score.GetComponent<Score>().GetScore();
     }
 }

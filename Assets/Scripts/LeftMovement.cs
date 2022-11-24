@@ -6,6 +6,7 @@ public class LeftMovement : MonoBehaviour
     private BoxCollider2D _box;
     private float _groundWidth;
     private float _obstacleWidth;
+    
     void Start()
     {
         if (gameObject.CompareTag("Mountain"))
@@ -17,7 +18,6 @@ public class LeftMovement : MonoBehaviour
         {
             _obstacleWidth = GameObject.FindGameObjectWithTag("Column").GetComponent<BoxCollider2D>().size.x; //Yukardakiyle aynı ama yukarıdaki daha güzel
         }
-        
     }
 
     void Update()

@@ -32,4 +32,8 @@ public class Score : MonoBehaviour
             PlayerPrefs.SetInt("highscore", _highScore);
         }
     }
+    public int GetScore()
+    {
+        return _score;
+    }
 }

@@ -21,7 +21,6 @@ public class ObstacleSpawner : MonoBehaviour
                 _timer = 0;
             }
         }
-        
     }
 
     public void InstantiateObstacle()
